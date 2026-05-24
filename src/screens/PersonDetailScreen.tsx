@@ -13,7 +13,7 @@ export default function PersonDetailScreen() {
   const navigation = useNavigation<any>();
   const route: any = useRoute<PersonDetailRouteProp>();
   const { personId } = route.params;
-  const { people, cities, getContactMethodsForPerson } = useData();
+  const { people, cities, getContactMethodsForPerson, updatePerson } = useData();
   const person = people.find(p => p.id === personId);
   if (!person) {
     return (
@@ -46,6 +46,17 @@ export default function PersonDetailScreen() {
             Also: {additionalCityNames.join(', ')}
           </Text>
         )}
+      </View>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Relationship</Text>
+        <Text style={styles.sectionValue}>{person.relationshipType || 'None'}</Text>
+      </View>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Last Contacted</Text>
+        <Text style={styles.sectionValue}>{person.lastContactedAt ? new Date(person.lastContactedAt).toLocaleDateString() : 'Never'}</Text>
+        <Pressable style={styles.remindBtn} onPress={async ()=>{ await updatePerson({ ...person, lastContactedAt: new Date().toISOString() }); }}>
+          <Text style={{color:'#fff'}}>Mark contacted now</Text>
+        </Pressable>
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Tier</Text>
@@ -154,4 +165,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
   },
+  remindBtn:{marginTop:8,backgroundColor:'#007AFF',paddingHorizontal:10,paddingVertical:8,borderRadius:8,alignSelf:'flex-start'}
 });

@@ -81,6 +81,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const newPerson: Person = {
       id,
       name: partial.name ?? null,
+      relationshipType: partial.relationshipType ?? null,
       primaryCityId: partial.primaryCityId ?? null,
       additionalCityIds: partial.additionalCityIds ?? [],
       tier: (partial.tier ?? 'GREEN') as Tier,

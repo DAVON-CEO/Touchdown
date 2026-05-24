@@ -3,6 +3,7 @@ export type Tier = 'GREEN' | 'YELLOW' | 'ARCHIVE';
 export interface Person {
   id: string;
   name: string | null;
+  relationshipType: 'FAMILY' | 'FRIEND' | 'COLLEAGUE' | 'ACQUAINTANCE' | null;
   primaryCityId: string | null;
   additionalCityIds: string[];
   tier: Tier;

@@ -1,40 +1,21 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Switch } from 'react-native';
 
 export default function SettingsScreen() {
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [showNoRelationshipOnly, setShowNoRelationshipOnly] = useState(false);
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Privacy & Permissions</Text>
-      <Text style={styles.paragraph}>
-        Touchdown is a privacy-first personal utility. All of your data is stored locally on your device.
-        There is no server and no analytics. We do not scrape your contacts or monitor your interactions.
-      </Text>
-      <Text style={styles.paragraph}>
-        Touchdown helps you remember people and timing, but it will never send messages on your behalf or automate any interactions.
-      </Text>
-      <Text style={styles.paragraph}>
-        Optional features such as cloud sync may be added in the future. They will be disabled by default and encrypted end-to-end.
-      </Text>
-      <Text style={styles.header}>Permissions</Text>
-      <Text style={styles.paragraph}>
-        Touchdown does not require any special permissions to use. Notifications and location are disabled for now.
-      </Text>
+      <Text style={styles.header}>Reminders</Text>
+      <View style={styles.row}><Text style={styles.label}>Enable notifications</Text><Switch value={notificationsEnabled} onValueChange={setNotificationsEnabled} /></View>
+      <Text style={styles.paragraph}>When enabled, Touchdown can remind you to follow up with people you haven’t contacted recently.</Text>
+      <Text style={styles.header}>People Filters</Text>
+      <View style={styles.row}><Text style={styles.label}>Highlight missing relationship type</Text><Switch value={showNoRelationshipOnly} onValueChange={setShowNoRelationshipOnly} /></View>
+      <Text style={styles.paragraph}>Use this to curate contact records that still need relationship metadata.</Text>
+      <Text style={styles.header}>Data</Text>
+      <Text style={styles.paragraph}>All data remains local on your device. Relationship type is optional and nullable for imports.</Text>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-  },
-  header: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  paragraph: {
-    fontSize: 16,
-    marginBottom: 12,
-    lineHeight: 22,
-  },
-});
+const styles = StyleSheet.create({container:{padding:20},header:{fontSize:20,fontWeight:'bold',marginBottom:12,marginTop:4},paragraph:{fontSize:15,marginBottom:14,lineHeight:21,color:'#333'},row:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginBottom:10},label:{fontSize:16}});

@@ -6,93 +6,25 @@ import { getUpcomingTrip } from '../utils/date';
 
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
-  const { loading, trips, cities, getPeopleByCity } = useData();
-  if (loading) {
-    return (
-      <View style={styles.containerCentered}>
-        <ActivityIndicator />
-      </View>
-    );
-  }
+  const { loading, trips, cities, people, getPeopleByCity } = useData();
+  if (loading) return <View style={styles.containerCentered}><ActivityIndicator /></View>;
+
   const upcomingTrip = getUpcomingTrip(trips);
-  let content;
-  if (upcomingTrip) {
-    const city = cities.find(c => c.id === upcomingTrip.cityId);
-    const peopleCount = city ? getPeopleByCity(city.id).length : 0;
-    content = (
+  const dueContacts = people.filter(p => !p.lastContactedAt || ((Date.now() - new Date(p.lastContactedAt).getTime()) / 86400000) > 30);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.title}>NOW</Text>
+        <Text style={styles.info}>{dueContacts.length} people need contact follow-up</Text>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('PeopleTab')}><Text style={styles.buttonText}>Review People</Text></Pressable>
+      </View>
       <View style={styles.card}>
         <Text style={styles.title}>Next Trip</Text>
-        <Text style={styles.cityName}>{city?.name || 'Unknown City'}</Text>
-        <Text style={styles.info}>{peopleCount} known {peopleCount === 1 ? 'person' : 'people'}</Text>
-        <Pressable
-          style={styles.button}
-          onPress={() => {
-            if (city) {
-              // Navigate to city detail in Cities tab
-              navigation.navigate('CitiesTab', {
-                screen: 'CityDetail',
-                params: { cityId: city.id },
-              });
-            }
-          }}
-        >
-          <Text style={styles.buttonText}>View City</Text>
-        </Pressable>
+        {upcomingTrip ? <Text style={styles.cityName}>{cities.find(c => c.id === upcomingTrip.cityId)?.name || 'Unknown City'} • {(getPeopleByCity(upcomingTrip.cityId) || []).length} contacts</Text> : <Text style={styles.info}>No upcoming trips</Text>}
       </View>
-    );
-  } else {
-    content = (
-      <View style={styles.card}>
-        <Text style={styles.title}>No Upcoming Trips</Text>
-        <Text style={styles.info}>Schedule a trip to plan your connections.</Text>
-      </View>
-    );
-  }
-  return <View style={styles.container}>{content}</View>;
+    </View>
+  );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  containerCentered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  card: {
-    width: '100%',
-    padding: 20,
-    borderRadius: 8,
-    backgroundColor: '#f2f2f2',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  cityName: {
-    fontSize: 28,
-    fontWeight: '600',
-    marginVertical: 8,
-  },
-  info: {
-    fontSize: 16,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 4,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-});
+const styles = StyleSheet.create({container:{flex:1,padding:16,gap:12,justifyContent:'center'},containerCentered:{flex:1,justifyContent:'center',alignItems:'center'},card:{padding:20,borderRadius:8,backgroundColor:'#f2f2f2'},title:{fontSize:20,fontWeight:'bold',marginBottom:8},cityName:{fontSize:18,fontWeight:'600'},info:{fontSize:15},button:{marginTop:10,backgroundColor:'#007AFF',paddingHorizontal:12,paddingVertical:8,borderRadius:4,alignSelf:'flex-start'},buttonText:{color:'#fff'}});
