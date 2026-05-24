@@ -12,6 +12,7 @@ export function initializeDatabase(): Promise<void> {
         `CREATE TABLE IF NOT EXISTS people (
           id TEXT PRIMARY KEY NOT NULL,
           name TEXT,
+          relationshipType TEXT,
           primaryCityId TEXT,
           additionalCityIds TEXT,
           tier TEXT NOT NULL,
@@ -20,6 +21,9 @@ export function initializeDatabase(): Promise<void> {
           createdAt TEXT NOT NULL
         );`
       );
+
+
+      tx.executeSql(`ALTER TABLE people ADD COLUMN relationshipType TEXT;`, [], () => {}, () => false);
 
       // Cities table
       tx.executeSql(
@@ -121,11 +125,12 @@ export async function insertPerson(person: Person): Promise<void> {
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
-        `INSERT INTO people (id, name, primaryCityId, additionalCityIds, tier, notes, lastContactedAt, createdAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO people (id, name, relationshipType, primaryCityId, additionalCityIds, tier, notes, lastContactedAt, createdAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           person.id,
           person.name,
+          person.relationshipType,
           person.primaryCityId,
           JSON.stringify(person.additionalCityIds || []),
           person.tier,
@@ -147,9 +152,10 @@ export async function updatePerson(person: Person): Promise<void> {
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
-        `UPDATE people SET name = ?, primaryCityId = ?, additionalCityIds = ?, tier = ?, notes = ?, lastContactedAt = ? WHERE id = ?`,
+        `UPDATE people SET name = ?, relationshipType = ?, primaryCityId = ?, additionalCityIds = ?, tier = ?, notes = ?, lastContactedAt = ? WHERE id = ?`,
         [
           person.name,
+          person.relationshipType,
           person.primaryCityId,
           JSON.stringify(person.additionalCityIds || []),
           person.tier,

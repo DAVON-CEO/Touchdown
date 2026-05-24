@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { useData } from '../context/DataContext';
 import { CitiesStackParamList, PeopleStackParamList } from '../navigation/RootNavigator';
-import { ContactMethod, ContactPlatform, Tier } from '../data/models';
+import { ContactMethod, ContactPlatform, Tier, Person } from '../data/models';
 
 type AddEditPersonRouteProp = RouteProp<CitiesStackParamList & PeopleStackParamList, 'AddEditPerson'>;
 
@@ -51,6 +51,8 @@ export default function AddEditPersonScreen() {
   const [additionalCityIds, setAdditionalCityIds] = useState<string[]>(existingPerson?.additionalCityIds || []);
   const [tier, setTier] = useState<Tier>(existingPerson?.tier || 'GREEN');
   const [notes, setNotes] = useState<string>(existingPerson?.notes || '');
+  const [relationshipType, setRelationshipType] = useState<Person['relationshipType']>(existingPerson?.relationshipType || null);
+  const [bulkNames, setBulkNames] = useState<string>('');
   const [contactForms, setContactForms] = useState<ContactForm[]>([]);
   const [newCityName, setNewCityName] = useState<string>('');
   const [showAdditionalCities, setShowAdditionalCities] = useState<boolean>(false);
@@ -79,7 +81,7 @@ export default function AddEditPersonScreen() {
       chosenPrimary = cityId;
     }
     if (editing && existingPerson) {
-      const updatedPerson = { ...existingPerson, name: name || null, primaryCityId: chosenPrimary, additionalCityIds, tier, notes: notes || null };
+      const updatedPerson = { ...existingPerson, name: name || null, relationshipType, primaryCityId: chosenPrimary, additionalCityIds, tier, notes: notes || null };
       await updatePerson(updatedPerson);
       // Handle contact methods: update existing, add new, delete removed
       const originalMethods = getContactMethodsForPerson(existingPerson.id);
@@ -103,7 +105,12 @@ export default function AddEditPersonScreen() {
       navigation.goBack();
     } else {
       // Insert new
-      const personIdCreated = await addPerson({ name: name || null, primaryCityId: chosenPrimary || null, additionalCityIds, tier, notes: notes || null });
+      const names = bulkNames.split('\n').map(n=>n.trim()).filter(Boolean);
+      const queue = names.length ? names : [name || ''];
+      let personIdCreated = '';
+      for (const oneName of queue) {
+        personIdCreated = await addPerson({ name: oneName || null, relationshipType, primaryCityId: chosenPrimary || null, additionalCityIds, tier, notes: notes || null });
+      }
       // Contact methods
       for (const form of contactForms) {
         if (form.value.trim() === '') continue;
@@ -164,6 +171,24 @@ export default function AddEditPersonScreen() {
           placeholder="Enter name"
         />
       </View>
+      
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Relationship Type (optional)</Text>
+        <View style={styles.pickerContainer}>
+          <Picker selectedValue={relationshipType || 'NONE'} onValueChange={(value) => setRelationshipType(value === 'NONE' ? null : value as any)} style={{ flex: 1 }}>
+            <Picker.Item label="None" value="NONE" />
+            <Picker.Item label="Family" value="FAMILY" />
+            <Picker.Item label="Friend" value="FRIEND" />
+            <Picker.Item label="Colleague" value="COLLEAGUE" />
+            <Picker.Item label="Acquaintance" value="ACQUAINTANCE" />
+          </Picker>
+        </View>
+      </View>
+      {!editing && <View style={styles.formGroup}>
+        <Text style={styles.label}>Add Multiple Contacts</Text>
+        <TextInput value={bulkNames} onChangeText={setBulkNames} style={[styles.input,{height:90}]} placeholder="One name per line (all added to same city)" multiline />
+      </View>}
+
       <View style={styles.formGroup}>
         <Text style={styles.label}>Primary City</Text>
         <Pressable

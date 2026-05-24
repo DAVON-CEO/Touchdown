@@ -6,14 +6,16 @@ import { useData } from '../context/DataContext';
 export default function InboxScreen() {
   const navigation = useNavigation<any>();
   const { people } = useData();
-  const needsInfo = people.filter(p => !p.name || !p.primaryCityId);
+  const needsInfo = people.filter(p => !p.name || !p.primaryCityId || !p.relationshipType);
 
   const renderItem = ({ item }: { item: any }) => {
     const missingName = !item.name;
     const missingCity = !item.primaryCityId;
+    const missingRelationship = !item.relationshipType;
     let subtitle = [] as string[];
     if (missingName) subtitle.push('missing name');
     if (missingCity) subtitle.push('missing city');
+    if (missingRelationship) subtitle.push('missing relationship');
     return (
       <Pressable
         onPress={() => navigation.navigate('AddEditPerson', { personId: item.id })}
